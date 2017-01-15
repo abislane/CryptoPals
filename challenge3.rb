@@ -12,13 +12,16 @@ module Challenge3
   def self.get_chi_sq(bytes)
     count = Array.new(26, 0)
     ignored = 0
+    spaces = 0
 
     bytes.each do |char|
       if char >= 65 and char <= 90  # uppercase A-Z
         count[65 - char] += 1
       elsif char >= 97 and char <= 122 # lowercase a-z
         count[char - 97] += 1
-      elsif char >= 32 and char <= 126 # punctuation
+      elsif char == 32
+        spaces += 1
+      elsif char >= 33 and char <= 126 # punctuation
         ignored += 1
       elsif char == 9 or char == 10 or char == 13 # whitespace
         ignored += 1
@@ -29,6 +32,11 @@ module Challenge3
 
     chi2 = 0
     len = bytes.size - ignored
+    
+    if spaces < 3
+      return Float::INFINITY
+    end
+
     for i in (0...26) do
       observed = count[i]
       expected = len * @@english_freq[i]
