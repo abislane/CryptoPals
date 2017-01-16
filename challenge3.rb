@@ -16,7 +16,7 @@ module Challenge3
 
     bytes.each do |char|
       if char >= 65 and char <= 90  # uppercase A-Z
-        count[65 - char] += 1
+        count[char - 65] += 1
       elsif char >= 97 and char <= 122 # lowercase a-z
         count[char - 97] += 1
       elsif char == 32
