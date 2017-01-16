@@ -28,19 +28,60 @@ module Challenge6
   end
 
   def self.aggregate_hamming_dist(str, key_length)
-    substrings = []
-    for i in (0...6)
-      substrings.push(str[i*key_length...(i+1)*key_length])
+    total = 0
+    size = str.size / key_length - 1
+    for i in (0...size)
+      total += hamming_distance(str[i*key_length...(i+1)*key_length], str[(i+1)*key_length...(i+2)*key_length])
     end
 
-    total = 0
-    for i in (0...6)
-      for j in (i+1...6)
-        total += hamming_distance(substrings[i], substrings[j])
+    total / (1.0 * size * key_length)
+  end
+
+  def self.decrypt_repeated_xor(bytes, key_length)
+    blocks = get_blocks(bytes, key_length)
+    key = ''
+    decrypted_blocks = []
+
+    blocks.each do |block|
+      decoded = Challenge3::decode_single_xor(block)
+      decrypted_blocks.push(decoded.bytes)
+      if decoded.bytes.nil?
+        return
+      end
+      #puts 'key for block :' + decoded.key.to_s
+      key += decoded.key.chr
+    end
+
+    result = OpenStruct.new
+    result.bytes = compose_blocks(decrypted_blocks)
+    result.key = key
+    result
+  end
+
+  def self.get_blocks(bytes, key_length)
+    result = []
+    for i in (0...key_length)
+      result.push([])
+    end
+
+    bytes.each_with_index do |byte, i|
+      result[i % key_length].push(byte)
+    end
+
+    result
+  end
+
+  def self.compose_blocks(blocks)
+    result = []
+    for i in (0...blocks[0].size)
+      for j in (0...blocks.size)
+        if i < blocks[j].size
+          result.push(blocks[j][i])
+        end
       end
     end
 
-    total / (1.0 * key_length)
+    result
   end
 end
 
@@ -56,15 +97,17 @@ if __FILE__ == $0
 
   in_bytes = Challenge1::base64_to_bytes(input)
 
-  k = 0
-  min_ham_dist = Float::INFINITY
   for key_length in (2..40) do
     found_dist = Challenge6::aggregate_hamming_dist(input, key_length)
-    if(found_dist < min_ham_dist)
-      k = key_length
-      min_ham_dist = found_dist
+    
+    if found_dist < 3
+      possible_result = Challenge6::decrypt_repeated_xor(in_bytes, key_length)
+      unless possible_result.nil?
+        puts 'KEY: ' + possible_result.key
+        puts 'MESSAGE:'
+        puts possible_result.bytes.pack('c*')
+        break
+      end
     end
   end
-
-  puts 'verified key length of ' + k.to_s
 end
