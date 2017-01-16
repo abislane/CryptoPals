@@ -1,5 +1,6 @@
 
 require_relative 'challenge1.rb'
+require 'ostruct'
 
 module Challenge3
   @@english_freq = [
@@ -50,6 +51,27 @@ module Challenge3
   def self.single_xor(arr, key)
     arr.map { |byte| byte ^ key }
   end
+
+  def self.decode_single_xor(bytes)
+    best_ch2 = Float::INFINITY
+    best_bytes = nil
+
+    for key in (0...256) do 
+      decoded = single_xor(bytes, key)
+      score = get_chi_sq(decoded)
+
+      if score < best_ch2
+        best_ch2 = score
+        best_bytes = decoded
+      end
+    end
+
+    result = OpenStruct.new
+    result.bytes = best_bytes
+    result.score = best_ch2
+
+    result
+  end
 end
 
 if __FILE__ == $0
@@ -58,18 +80,7 @@ if __FILE__ == $0
   input = '1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736'
   in_bytes = Challenge1::hex_to_bytes(input)
 
-  best_ch2 = Float::INFINITY
-  best_bytes = nil
+  result = Challenge3::decode_single_xor(in_bytes)
 
-  for key in (0...256) do 
-    decoded = Challenge3::single_xor(in_bytes, key)
-    score = Challenge3::get_chi_sq(decoded)
-
-    if score < best_ch2
-      best_ch2 = score
-      best_bytes = decoded
-    end
-  end
-
-  puts best_bytes.pack('c*')
+  puts result.bytes.pack('c*')
 end
