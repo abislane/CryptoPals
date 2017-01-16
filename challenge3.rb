@@ -55,6 +55,7 @@ module Challenge3
   def self.decode_single_xor(bytes)
     best_ch2 = Float::INFINITY
     best_bytes = nil
+    best_key = 0
 
     for key in (0...256) do 
       decoded = single_xor(bytes, key)
@@ -63,13 +64,15 @@ module Challenge3
       if score < best_ch2
         best_ch2 = score
         best_bytes = decoded
+        best_key = key
       end
     end
 
     result = OpenStruct.new
     result.bytes = best_bytes
     result.score = best_ch2
-
+    result.key = key
+    
     result
   end
 end
