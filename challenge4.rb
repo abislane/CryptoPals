@@ -10,14 +10,10 @@ if __FILE__ == $0
   in_file.each_line do |line|
     bytes = Challenge1::hex_to_bytes(line)
 
-    for key in (0...256) do
-      decoded = Challenge3::single_xor(bytes, key)
-      score = Challenge3::get_chi_sq(decoded)
-
-      if score < best_ch2
-        best_ch2 = score
-        best_bytes = decoded
-      end
+    decoded = Challenge3::decode_single_xor(bytes)
+    if decoded.score < best_ch2
+      best_ch2 = decoded.score
+      best_bytes = decoded.bytes
     end
   end
 
