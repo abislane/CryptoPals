@@ -18,14 +18,14 @@ module Challenge10
     bytes1.each_with_index.map { |byte, i| byte ^ bytes2[i] }.pack('c*')
   end
 
-  def self.encrypt_CBC(str, key)
+  def self.encrypt_CBC(str, key, iv)
     blocks = get_blocks(str)
     init = Array.new(16, 0).pack('c*')
 
     encrypted = []
     blocks.each_with_index do |block, i|
       if i == 0
-        xored_block = str_xor(init, block)
+        xored_block = str_xor(iv, block)
       else
         xored_block = str_xor(encrypted[i-1], block)
       end
@@ -37,7 +37,7 @@ module Challenge10
     encrypted.join
   end
 
-  def self.decrypt_CBC(str, key)
+  def self.decrypt_CBC(str, key, iv)
     blocks = get_blocks(str)
     init = Array.new(16, 0).pack('c*')
 
@@ -46,7 +46,7 @@ module Challenge10
       decrypted_block = Challenge7::decrypt_ECB(block, key)
 
       if i == 0
-        xored_block = str_xor(init, decrypted_block)
+        xored_block = str_xor(iv, decrypted_block)
       else
         xored_block = str_xor(blocks[i-1], decrypted_block)
       end
@@ -73,6 +73,7 @@ end
 
 if __FILE__ == $0
   key = "YELLOW SUBMARINE"
+  iv = Array.new(16, 0).pack('c*')
   in_file = File.new('input10.txt', 'r')
   b64 = ''
   in_file.each_line do |line|
@@ -80,5 +81,5 @@ if __FILE__ == $0
   end
 
   encrypted = Challenge1::base64_to_bytes(b64).pack('c*')
-  puts Challenge10::decrypt_CBC(encrypted, key)
+  puts Challenge10::decrypt_CBC(encrypted, key, iv)
 end
