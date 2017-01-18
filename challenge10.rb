@@ -1,5 +1,6 @@
 require 'openssl'
 require_relative 'challenge1.rb'
+require_relative 'challenge7.rb'
 require_relative 'challenge9.rb'
 
 module Challenge10
@@ -18,11 +19,6 @@ module Challenge10
   end
 
   def self.encrypt_CBC(str, key)
-    cipher = OpenSSL::Cipher::AES.new(128, :ECB)
-    cipher.encrypt
-    cipher.padding = 0
-    cipher.key = key
-
     blocks = get_blocks(str)
     init = Array.new(16, 0).pack('c*')
 
@@ -34,7 +30,7 @@ module Challenge10
         xored_block = str_xor(encrypted[i-1], block)
       end
 
-      encrypted_block = cipher.update(xored_block)
+      encrypted_block = Challenge7::encrypt_ECB(block, key)
       encrypted.push(encrypted_block)
     end
 
@@ -42,17 +38,12 @@ module Challenge10
   end
 
   def self.decrypt_CBC(str, key)
-    cipher = OpenSSL::Cipher::AES.new(128, :ECB)
-    cipher.decrypt
-    cipher.padding = 0
-    cipher.key = key
-
     blocks = get_blocks(str)
     init = Array.new(16, 0).pack('c*')
 
     decrypted = []
     blocks.each_with_index do |block, i|
-      decrypted_block = cipher.update(block)
+      decrypted_block = Challenge7::decrypt_ECB(block, key)
 
       if i == 0
         xored_block = str_xor(init, decrypted_block)
