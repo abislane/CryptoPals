@@ -20,7 +20,6 @@ module Challenge10
 
   def self.encrypt_CBC(str, key, iv)
     blocks = get_blocks(str)
-    init = Array.new(16, 0).pack('c*')
 
     encrypted = []
     blocks.each_with_index do |block, i|
@@ -39,7 +38,6 @@ module Challenge10
 
   def self.decrypt_CBC(str, key, iv)
     blocks = get_blocks(str)
-    init = Array.new(16, 0).pack('c*')
 
     decrypted = []
     blocks.each_with_index do |block, i|
